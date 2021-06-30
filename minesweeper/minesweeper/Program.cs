@@ -9,19 +9,31 @@ namespace minesweeper
     class Program
     {
         public static field[,] mines;
-        public static int width;
+        public static int width = 0;
+        public static int countMines = 0;
+        public static bool lost = false;
         public static bool isRunning = true;
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Minesweeper!\n");
-            Console.Write("Feldgröße angeben: ");
+            Console.WriteLine("Minesweeper!\n\n f- Flagge setzen. \n c- Feld zurücksetzen \n o- Feld öffnen\n\n");
+            
+            NewGame();           
+
+            Console.Write("Taste drücken zum Verlassen...");
+            Console.ReadKey();
+        }
+
+        static void NewGame()
+        {
+            isRunning = true;
+            lost = false;
+            Console.Write("Feldgröße angeben (Kantenlänge): ");
             width = Convert.ToInt32(Console.ReadLine());
             Console.WriteLine("Okay!");
             Console.Write("\nAnzahl Minen angeben: ");
-            int count = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine(count.ToString());
-            CalculateField(width, count);
+            countMines = Convert.ToInt32(Console.ReadLine());
+            CalculateField(width, countMines);
 
             DisplayMinefield(false);
 
@@ -29,11 +41,22 @@ namespace minesweeper
             {
                 Console.Write("\nFeld und Aktion (x,y,c/f/o) : ");
                 GetAction(Console.ReadLine());
-                DisplayMinefield(false);
+                CheckMap();
+                if(!lost)
+                {
+                    DisplayMinefield(false);
+                }                
             }
 
-            Console.Write("Taste drücken zum Verlassen...");
-            Console.ReadKey();
+            Console.Write("\n\n Neues Spiel starten? (Y/N) :");
+            if(Console.ReadLine()=="Y")
+            {
+                NewGame();
+            }
+            else if(Console.ReadLine()=="N")
+            {
+                // Nothing.
+            }
         }
 
         static void GetAction(string action)
@@ -55,15 +78,30 @@ namespace minesweeper
             }
             else if(a=='o')
             {
-                if(mines[x,y].mine)
+                mines[x, y].flagged = false;
+                mines[x, y].open = true;
+            }
+        }
+
+        static void CheckMap()
+        {
+            int countFlagged=0;
+
+            foreach(field f in mines)
+            {
+                if(f.mine && f.open && !f.flagged)
                 {
                     Loose();
                 }
-                else
+                if(f.mine && f.flagged)
                 {
-                    mines[x, y].flagged = false;
-                    mines[x, y].open = true;
+                    countFlagged++;
                 }
+            }
+
+            if(countFlagged == countMines)
+            {
+                Win();
             }
         }
 
@@ -71,6 +109,14 @@ namespace minesweeper
         {
             Console.WriteLine("\n\n Verloren! \n\n");
             DisplayMinefield(true);
+            lost = true;
+            isRunning = false;
+        }
+
+        static void Win()
+        {
+            Console.WriteLine("\n\nGewonnen!");
+            lost = true;
             isRunning = false;
         }
 
@@ -97,18 +143,49 @@ namespace minesweeper
                 }
             }
 
-            for (int x = 1; x < w-1; x++)
+            for (int x = 0; x < w; x++)
             {
-                for (int y = 1; y < w-1; y++)
+                for (int y = 0; y < w; y++)
                 {
-                    if (minefield[x - 1, y - 1].mine) minefield[x, y].count++;
-                    if (minefield[x, y - 1].mine) minefield[x, y].count++;
-                    if (minefield[x + 1, y - 1].mine) minefield[x, y].count++;
-                    if (minefield[x - 1, y].mine) minefield[x, y].count++;
-                    if (minefield[x + 1, y].mine) minefield[x, y].count++;
-                    if (minefield[x - 1, y + 1].mine) minefield[x, y].count++;
-                    if (minefield[x, y + 1].mine) minefield[x, y].count++;
-                    if (minefield[x + 1, y + 1].mine) minefield[x, y].count++;
+                    if(x!=0 && y!=0)
+                    {
+                        if (minefield[x - 1, y - 1].mine) minefield[x, y].count++;
+                    }
+                    if(x!=0)
+                    {
+                        if (minefield[x - 1, y].mine) minefield[x, y].count++;
+                    }
+
+                    if(y!=0)
+                    {
+                        if (minefield[x, y - 1].mine) minefield[x, y].count++;
+                    }
+
+                   if(x!=w-1)
+                    {
+
+                        if (minefield[x + 1, y].mine) minefield[x, y].count++;
+                    }
+                    
+                   if(y!=w-1)
+                    {
+                        if (minefield[x, y + 1].mine) minefield[x, y].count++;
+                    }
+
+                   if(x!=0 && y!=w-1)
+                    {
+                        if (minefield[x - 1, y + 1].mine) minefield[x, y].count++;
+                    }
+
+                   if (x!=w-1 && y!=0)
+                    {
+                        if (minefield[x + 1, y - 1].mine) minefield[x, y].count++;
+                    }
+                    
+                   if(x!=w-1 && y!=w-1)
+                    {
+                        if (minefield[x + 1, y + 1].mine) minefield[x, y].count++;
+                    }               
                 }
             }
 
