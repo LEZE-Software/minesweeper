@@ -62,8 +62,8 @@ namespace minesweeper
         static void GetAction(string action)
         {
             string[] values = action.Split(',');
-            int x = Convert.ToInt32(values[0]);
-            int y = Convert.ToInt32(values[1]);
+            int x = Convert.ToInt32(values[0])-1;
+            int y = Convert.ToInt32(values[1])-1;
             char a = Convert.ToChar(values[2]);
 
             if(a=='c')
@@ -80,6 +80,28 @@ namespace minesweeper
             {
                 mines[x, y].flagged = false;
                 mines[x, y].open = true;
+            }
+        }
+
+        static void OpenField(int x, int y)
+        {
+            int topLeft = 0;
+            int topRight = 0;
+            int downLeft = 0;
+            int downRight = 0;
+
+            if(x==0 && y==0)
+            {
+                for(int x_=0;x_<=x_+1;x_++)
+                {
+                    for (int y_ = 0; y_ <= y_ + 1; y_++)
+                    {
+                        if(!mines[x_, y_].open && !mines[x_,y_].mine)
+                        {
+                            OpenField(x_, y_);
+                        }
+                    }
+                }
             }
         }
 
